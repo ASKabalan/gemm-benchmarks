@@ -9,9 +9,11 @@ from jax import lax
 import time
 import argparse
 import os
+from itertools import product
 
 def matmul_kernel(x_ref, y_ref, z_ref, *, bk: int):
   m, n = x_ref.shape[0], y_ref.shape[1]
+  print(f"m: {m}, n: {n}")
   k = y_ref.shape[0]
   acc = jnp.zeros((m, n), dtype=jnp.float32)
   def body(i, acc):
@@ -38,27 +40,34 @@ def matmul(x: jax.Array, y: jax.Array, *, bm: int = 32, bn: int = 32, bk: int = 
     debug=debug, interpret=interpret,
   )(x, y)
 
+
 def autotune(x , y , c, precision, dtype, output):
 
   times = {}
-  for bm in [16 , 32 , 64, 128, 256]:
-      for bn in [16 , 32 , 64, 128, 256]:
-          for bk in [16 , 32 , 64, 128, 256]:
+  grid_spec = product([16 , 32 , 64, 128, 256], repeat=3)
+  for bm , bn , bk in grid_spec:
 
-              print(f"Trying bm={bm}, bn={bn}, bk={bk}")
-              # 260000 is my shared memory limit
-              # TODO(wassim) : make it more dynamic
-              if bm * bn * bk > 260000:
-                  continue
-
-              z = matmul(x, y, bm=bm, bn=bn, bk=bk).block_until_ready()
-              start = time.perf_counter()
-              z = matmul(x, y, bm=bm, bn=bn, bk=bk).block_until_ready()
-              end = time.perf_counter()
-              elapsed = (end - start)*1000
-              times[elapsed] = (bm, bn, bk)
+    print(f"Trying bm={bm}, bn={bn}, bk={bk}")
+    try:
+      z = matmul(x, y, bm=bm, bn=bn, bk=bk).block_until_ready()
+      start = time.perf_counter()
+      z = matmul(x, y, bm=bm, bn=bn, bk=bk).block_until_ready()
+      end = time.perf_counter()
+      elapsed = (end - start)*1000
+      times[elapsed] = (bm, bn, bk)
+    except Exception as e:
+      print(f"Failed with bm={bm}, bn={bn}, bk={bk}")
+      print(f"Error: {e}")
+      continue
 
   best_time = min(times.keys())
+
+  for key in times:
+    if key == best_time:
+      print(f"Best time: {key:.2f} ms, bm={times[key][0]}, bn={times[key][1]}, bk={times[key][2]}")
+    else:
+      print(f"Time: {key:.2f} ms, bm={times[key][0]}, bn={times[key][1]}, bk={times[key][2]}")
+
   bm, bn, bk = times[best_time]
   return bm, bn, bk
 
@@ -87,9 +96,10 @@ def main(m, n, k, precision, dtype, output):
   tflops = compute_effective_tflops(m, n, k, elapsed)
   
   if output is not None:
-    with open(output, "w") as f:
-      if not os.path.exists(output):
-        f.write("framework,bandwidth,tflops,precision,m,n,k,time\n")
+    if not os.path.exists(output):
+      with open(output, "w") as f:
+          f.write("framework,bandwidth,tflops,precision,m,n,k,time\n")
+    with open(output, "a") as f:
       f.write(f"PALLAS,{bandwidth:.2f},{tflops:.2f},{precision},{m},{n},{k},{elapsed:.2f}\n")
 
 

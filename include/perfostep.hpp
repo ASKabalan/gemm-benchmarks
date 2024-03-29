@@ -345,12 +345,14 @@ private:
 
 // helper functions 
 
-void print_device_info()
+inline void print_device_info()
 {
     int device_id{0};
     cudaGetDevice(&device_id);
     cudaDeviceProp device_prop;
     cudaGetDeviceProperties(&device_prop, device_id);
+    std::cout << "Shared Memory Per Block: " << device_prop.sharedMemPerBlock
+              << " bytes" << std::endl;
     std::cout << "Device Name: " << device_prop.name << std::endl;
     float const memory_size{static_cast<float>(device_prop.totalGlobalMem) /
                             (1 << 30)};
@@ -363,12 +365,12 @@ void print_device_info()
 }
 
 template<typename T>
-float compute_effective_bandwidth(size_t m, size_t n, size_t k, double latency)
+inline float compute_effective_bandwidth(size_t m, size_t n, size_t k, double latency)
 {
     return ((m * k + k * n + m * n) * sizeof(T)) / (latency * 1e-3) / 1e9;
 }
 
-float compute_effective_tflops(size_t m, size_t n, size_t k, double latency)
+inline float compute_effective_tflops(size_t m, size_t n, size_t k, double latency)
 {
     return (2.0 * m * k * n) / (latency * 1e-3) / 1e12;
 }

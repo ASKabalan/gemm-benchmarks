@@ -45,7 +45,7 @@ def main(m, n, k, precision, output):
         if not os.path.exists(output):
             with open(output, "w") as f:
                 f.write("framework,bandwidth,tflops,precision,m,n,k,time\n")
-        with open(output, "w") as f:
+        with open(output, "a+") as f:
             f.write(f"JAX,{bandwidth:.2f},{tflops:.2f},{precision},{m},{n},{k},{elapsed:.2f}\n")
 
 if __name__ == "__main__":
@@ -55,12 +55,12 @@ if __name__ == "__main__":
     argparser.add_argument("-n" , "--n", type=int, default=4096)
     argparser.add_argument("-k" , "--k", type=int, default=4096)
     argparser.add_argument("-p" , "--precision", type=str, default="fp32")
-    argparser.add_argument("-xla" , "--optimize_xla", action="store_true")
+    argparser.add_argument("-xla" , "--optimize_xla", action="store_true",default=False)
     argparser.add_argument("-o" , "--output", type=str, default=None)
 
     args = argparser.parse_args()
 
-    if argparse.optimize_xla:
+    if True:
         os.environ['XLA_FLAGS'] = (
                     '--xla_gpu_enable_triton_softmax_fusion=true '
                     '--xla_gpu_triton_gemm_any=True '

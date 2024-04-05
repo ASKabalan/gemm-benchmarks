@@ -83,6 +83,7 @@ void run_benchmark(int m, int n, int k, const std::string &precision,
   perf.UpdateCols(cuda_cols);
 
   perf.Report();
+  perf.PrintToCSV(cuda_csv);
 }
 
 int main(int argc, char *argv[]) {

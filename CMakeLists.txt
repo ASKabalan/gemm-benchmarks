@@ -7,7 +7,7 @@ project(thrust_benchmarking LANGUAGES CXX CUDA)
 
 set(NVHPC_CUDA_VERSION 12.3)
 # Set CUDA architecture
-set(CUDA_ARCHITECTURES 89)
+set(CMAKE_CUDA_ARCHITECTURES 89)
 set(CMAKE_BUILD_TYPE Release)
 # Add Thrust and NVHPC cmake to cmake prefix path from $NVHPC_ROOT/cmake and thrust from $CUDA_HOME/lib64/cmake/thrust
 list(APPEND CMAKE_PREFIX_PATH $ENV{NVHPC_ROOT}/cmake)

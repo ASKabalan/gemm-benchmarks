@@ -24,3 +24,5 @@ python jax/jax_mm.py -m 4096 -n 4096 -k 4096 -p fp32 -o perf.csv
 ./build/thrust/thrust_gemm -m 4096 -n 4096 -k 4096 -p fp32 -co perf.csv
 ./build/matx/matx_gemm -m 4096 -n 4096 -k 4096 -p fp32 -co perf.csv
 ```
+
+to run benchmarks for all with sizes from 128 -> 65536 use `run.sh` (memory overflow errors are ignored and not logged)

@@ -8,6 +8,6 @@ add_executable(cuda_gemm
 
 
 target_link_libraries(cuda_gemm PRIVATE NVHPC::CUDA NVHPC::CUBLAS)
-target_include_directories(cuda_gemm PRIVATE ${CMAKE_CURRENT_LIST_DIR}/include)
+target_include_directories(cuda_gemm PUBLIC ${CMAKE_CURRENT_LIST_DIR}/include ${CMAKE_SOURCE_DIR}/include)
 set_target_properties(cuda_gemm PROPERTIES LINKER_LANGUAGE CXX)
-set_target_properties(cuda_gemm PROPERTIES CUDA_ARCHITECTURES ${CUDA_ARCHITECTURES})
+set_target_properties(cuda_gemm PROPERTIES CUDA_ARCHITECTURES ${CMAKE_CUDA_ARCHITECTURES})
